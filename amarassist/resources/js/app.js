@@ -1,4 +1,7 @@
 import "./bootstrap";
+import $ from "jquery";
+window.$ = window.jQuery = $;
+import "materialize-css/dist/js/materialize.min.js";
 import { createApp, h } from "vue";
 import { createInertiaApp } from "@inertiajs/inertia-vue3";
 import { resolvePageComponent } from "laravel-vite-plugin/inertia-helpers";
