@@ -56,17 +56,16 @@ export default {
     },
     methods: {
         handleLogin() {
-            // Lógica de login aqui
-            console.log("Email:", this.email);
-            console.log("Senha:", this.password);
+            this.$inertia.visit("/dashboard");
         },
     },
 };
 </script>
 
 <style lang="scss" scoped>
-@import "../../scss/_variables.scss";
-@import "@fontsource/nunito/index.css";
+$blue-color: #621587;
+$orange-color: #f36606;
+
 .login-container {
     display: flex;
     justify-content: center;

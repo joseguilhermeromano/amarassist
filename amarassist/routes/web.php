@@ -14,6 +14,10 @@ use Inertia\Inertia;
 |
 */
 
+Route::get('/dashboard', function () {
+    return Inertia::render('Dashboard');
+});
+
 Route::get('/', function () {
-    return Inertia::render('Home');
+    return Inertia::render('Login');
 });
