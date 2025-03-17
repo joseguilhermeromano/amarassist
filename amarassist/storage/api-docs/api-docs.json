@@ -99,9 +99,292 @@
                     }
                 ]
             }
+        },
+        "/products": {
+            "get": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Listar todos os produtos",
+                "operationId": "c1ff6f862214e1896c59cfe0491ce0e8",
+                "responses": {
+                    "200": {
+                        "description": "Lista de produtos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "id": {
+                                                "description": "ID do produto",
+                                                "type": "integer"
+                                            },
+                                            "title": {
+                                                "description": "Título do produto",
+                                                "type": "string"
+                                            },
+                                            "sale_price": {
+                                                "description": "Preço de venda",
+                                                "type": "number",
+                                                "format": "float"
+                                            },
+                                            "cost": {
+                                                "description": "Custo do produto",
+                                                "type": "number",
+                                                "format": "float"
+                                            },
+                                            "description": {
+                                                "description": "Descrição do produto",
+                                                "type": "string"
+                                            },
+                                            "images": {
+                                                "description": "Imagens do produto",
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Criar um novo produto",
+                "operationId": "399770d33fa4672f1216707d0e236763",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "title",
+                                    "sale_price",
+                                    "cost",
+                                    "description",
+                                    "images"
+                                ],
+                                "properties": {
+                                    "title": {
+                                        "type": "string",
+                                        "example": "Produto Exemplo"
+                                    },
+                                    "sale_price": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 120
+                                    },
+                                    "cost": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 100
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "<p>Descrição do produto</p>"
+                                    },
+                                    "images": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "example": "imagem1.jpg"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Produto criado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "description": "ID do produto",
+                                            "type": "integer"
+                                        },
+                                        "title": {
+                                            "description": "Título do produto",
+                                            "type": "string"
+                                        },
+                                        "sale_price": {
+                                            "description": "Preço de venda",
+                                            "type": "number",
+                                            "format": "float"
+                                        },
+                                        "cost": {
+                                            "description": "Custo do produto",
+                                            "type": "number",
+                                            "format": "float"
+                                        },
+                                        "description": {
+                                            "description": "Descrição do produto",
+                                            "type": "string"
+                                        },
+                                        "images": {
+                                            "description": "Imagens do produto",
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Erro de validação"
+                    }
+                }
+            }
+        },
+        "/products/{id}": {
+            "put": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Atualizar um produto",
+                "operationId": "1419d479f9340e30e67fe21a2ca525b7",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID do produto",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "title": {
+                                        "type": "string",
+                                        "example": "Produto Atualizado"
+                                    },
+                                    "sale_price": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 130
+                                    },
+                                    "cost": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 110
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "<p>Descrição atualizada</p>"
+                                    },
+                                    "images": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "example": "imagem2.jpg"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Produto atualizado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "description": "ID do produto",
+                                            "type": "integer"
+                                        },
+                                        "title": {
+                                            "description": "Título do produto",
+                                            "type": "string"
+                                        },
+                                        "sale_price": {
+                                            "description": "Preço de venda",
+                                            "type": "number",
+                                            "format": "float"
+                                        },
+                                        "cost": {
+                                            "description": "Custo do produto",
+                                            "type": "number",
+                                            "format": "float"
+                                        },
+                                        "description": {
+                                            "description": "Descrição do produto",
+                                            "type": "string"
+                                        },
+                                        "images": {
+                                            "description": "Imagens do produto",
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Produto não encontrado"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Remover um produto",
+                "operationId": "fe34b364a3f192305598b65d04d06b5d",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID do produto",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Produto removido com sucesso"
+                    },
+                    "404": {
+                        "description": "Produto não encontrado"
+                    }
+                }
+            }
         }
     },
     "tags": [
+        {
+            "name": "Products"
+        },
         {
             "name": "Auth",
             "description": "Auth"

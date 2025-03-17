@@ -1,0 +1,42 @@
+components:
+  schemas:
+    Product:
+      type: object
+      title: "Product"
+      description: "Modelo de produto"
+      required:
+        - title
+        - sale_price
+        - cost
+        - description
+        - images
+      properties:
+        id:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: "Produto X"
+        sale_price:
+          type: number
+          format: float
+          example: 99.99
+        cost:
+          type: number
+          format: float
+          example: 50.00
+        description:
+          type: string
+          example: "<p>Descrição do produto</p>"
+        images:
+          type: array
+          items:
+            type: string
+            format: url
+            example: "https://example.com/image.jpg"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
