@@ -44,7 +44,7 @@
                         <h4>Produtos</h4>
                         <a
                             class="btn waves-effect waves-light btn-orange new-product"
-                            @click="createProduct"
+                            @click="openCreateModal"
                         >
                             <i class="fa fa-plus small-icon"></i>Novo Produto
                         </a>
@@ -64,7 +64,8 @@
                                 <th>ID</th>
                                 <th>Nome</th>
                                 <th>Descrição</th>
-                                <th>Preço</th>
+                                <th>Preço de Venda</th>
+                                <th>Custo</th>
                                 <th class="text-center">Ações</th>
                             </tr>
                         </thead>
@@ -74,30 +75,33 @@
                                 :key="product.id"
                             >
                                 <td>{{ product.id }}</td>
-                                <td>{{ product.name }}</td>
-                                <td>{{ product.description }}</td>
-                                <td>{{ product.price }}</td>
+                                <td>{{ product.title }}</td>
+                                <td v-html="product.description"></td>
+                                <td>
+                                    {{ formatCurrency(product.sale_price) }}
+                                </td>
+                                <td>{{ formatCurrency(product.cost) }}</td>
                                 <td class="table-actions">
                                     <a
                                         class="btn-flat btn-action"
                                         @click="viewProduct(product.id)"
                                     >
-                                        <i class="fa fa-eye small-icon"></i>
-                                        Detalhes
+                                        <i class="fa fa-eye small-icon"></i
+                                        >Detalhes
                                     </a>
                                     <a
                                         class="btn-flat btn-action"
-                                        @click="editProduct(product.id)"
+                                        @click="openEditModal(product)"
                                     >
-                                        <i class="fa fa-edit small-icon"></i>
-                                        Editar
+                                        <i class="fa fa-edit small-icon"></i
+                                        >Editar
                                     </a>
                                     <a
                                         class="btn-flat btn-action"
                                         @click="deleteProduct(product.id)"
                                     >
-                                        <i class="fa fa-trash small-icon"></i>
-                                        Excluir
+                                        <i class="fa fa-trash small-icon"></i
+                                        >Excluir
                                     </a>
                                 </td>
                             </tr>
@@ -106,6 +110,77 @@
                 </div>
             </div>
         </main>
+
+        <!-- Modal para Criar/Editar Produto -->
+        <div v-show="isModalOpen" class="modal">
+            <div class="modal-content">
+                <h4>{{ isEditing ? "Editar Produto" : "Novo Produto" }}</h4>
+                <form
+                    @submit.prevent="
+                        isEditing ? updateProduct() : createProduct()
+                    "
+                >
+                    <div class="input-field">
+                        <input
+                            id="title"
+                            type="text"
+                            v-model="form.title"
+                            required
+                        />
+                        <label for="title">Título</label>
+                    </div>
+                    <div class="input-field">
+                        <input
+                            id="sale_price"
+                            type="number"
+                            v-model="form.sale_price"
+                            required
+                        />
+                        <label for="sale_price">Preço de Venda</label>
+                    </div>
+                    <div class="input-field">
+                        <input
+                            id="cost"
+                            type="number"
+                            v-model="form.cost"
+                            required
+                        />
+                        <label for="cost">Custo</label>
+                    </div>
+                    <div class="input-field">
+                        <textarea
+                            id="description"
+                            v-model="form.description"
+                            class="materialize-textarea"
+                            required
+                        ></textarea>
+                        <label for="description">Descrição</label>
+                    </div>
+                    <div class="input-field">
+                        <input
+                            id="images"
+                            type="text"
+                            v-model="form.images"
+                            required
+                        />
+                        <label for="images"
+                            >Imagens (URLs separadas por vírgula)</label
+                        >
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-flat" @click="closeModal">
+                    Cancelar
+                </button>
+                <button
+                    type="submit"
+                    class="btn waves-effect waves-light btn-orange"
+                >
+                    {{ isEditing ? "Salvar" : "Criar" }}
+                </button>
+            </div>
+        </div>
 
         <!-- Rodapé -->
         <footer class="page-footer custom-footer">
@@ -125,32 +200,27 @@
 </template>
 
 <script>
+import axios from "axios";
+import M from "materialize-css";
+
 export default {
     name: "Dashboard",
     data() {
         return {
             searchQuery: "",
-            products: [
-                {
-                    id: 1,
-                    name: "Produto 1",
-                    description: "Descrição do Produto 1",
-                    price: "R$ 100,00",
-                },
-                {
-                    id: 2,
-                    name: "Produto 2",
-                    description: "Descrição do Produto 2",
-                    price: "R$ 200,00",
-                },
-                {
-                    id: 3,
-                    name: "Produto 3",
-                    description: "Descrição do Produto 3",
-                    price: "R$ 300,00",
-                },
-            ],
+            products: [],
             filteredProducts: [],
+            isModalOpen: false,
+            isEditing: false,
+            form: {
+                id: null,
+                title: "",
+                sale_price: "",
+                cost: "",
+                description: "",
+                images: "",
+            },
+            modalInstance: null, // Armazena a instância do modal
         };
     },
     computed: {
@@ -159,43 +229,122 @@ export default {
         },
     },
     methods: {
+        async fetchProducts() {
+            try {
+                const response = await axios.get("/api/products");
+                this.products = response.data;
+                this.filteredProducts = this.products;
+            } catch (error) {
+                console.error("Erro ao buscar produtos:", error);
+            }
+        },
+        openCreateModal() {
+            this.isEditing = false;
+            this.form = {
+                id: null,
+                title: "",
+                sale_price: "",
+                cost: "",
+                description: "",
+                images: "",
+            };
+            this.isModalOpen = true;
+            this.$nextTick(() => {
+                this.modalInstance = M.Modal.init(
+                    document.querySelector(".modal"),
+                    {}
+                );
+                this.modalInstance.open();
+            });
+        },
+        openEditModal(product) {
+            this.isEditing = true;
+            this.form = {
+                id: product.id,
+                title: product.title,
+                sale_price: product.sale_price,
+                cost: product.cost,
+                description: product.description,
+                images: product.images.join(", "),
+            };
+            this.isModalOpen = true;
+            this.$nextTick(() => {
+                this.modalInstance = M.Modal.init(
+                    document.querySelector(".modal"),
+                    {}
+                );
+                this.modalInstance.open();
+            });
+        },
+        closeModal() {
+            this.isModalOpen = false;
+            if (this.modalInstance) {
+                this.modalInstance.close();
+            }
+        },
+        async createProduct() {
+            try {
+                const response = await axios.post("/api/products", {
+                    ...this.form,
+                    images: this.form.images
+                        .split(",")
+                        .map((url) => url.trim()),
+                });
+                this.products.push(response.data);
+                this.filterProducts();
+                this.closeModal();
+            } catch (error) {
+                console.error("Erro ao criar produto:", error);
+            }
+        },
+        async updateProduct() {
+            try {
+                const response = await axios.put(
+                    `/api/products/${this.form.id}`,
+                    {
+                        ...this.form,
+                        images: this.form.images
+                            .split(",")
+                            .map((url) => url.trim()),
+                    }
+                );
+                const index = this.products.findIndex(
+                    (p) => p.id === this.form.id
+                );
+                this.products[index] = response.data;
+                this.filterProducts();
+                this.closeModal();
+            } catch (error) {
+                console.error("Erro ao atualizar produto:", error);
+            }
+        },
+        async deleteProduct(id) {
+            if (confirm("Tem certeza que deseja excluir este produto?")) {
+                try {
+                    await axios.delete(`/api/products/${id}`);
+                    this.products = this.products.filter(
+                        (product) => product.id !== id
+                    );
+                    this.filterProducts();
+                } catch (error) {
+                    console.error("Erro ao excluir produto:", error);
+                }
+            }
+        },
+        formatCurrency(value) {
+            return new Intl.NumberFormat("pt-BR", {
+                style: "currency",
+                currency: "BRL",
+            }).format(value);
+        },
         logout() {
             localStorage.removeItem("token");
             delete axios.defaults.headers.common["Authorization"];
-            this.$inertia.visit("/", { replace: true });
-        },
-        createProduct() {
-            alert("Criar novo produto");
-        },
-        viewProduct(id) {
-            alert(`Visualizar produto com ID: ${id}`);
-        },
-        editProduct(id) {
-            alert(`Editar produto com ID: ${id}`);
-        },
-        deleteProduct(id) {
-            if (confirm("Tem certeza que deseja excluir este produto?")) {
-                this.products = this.products.filter(
-                    (product) => product.id !== id
-                );
-                this.filterProducts();
-            }
-        },
-        filterProducts() {
-            if (this.searchQuery) {
-                this.filteredProducts = this.products.filter((product) =>
-                    product.name
-                        .toLowerCase()
-                        .includes(this.searchQuery.toLowerCase())
-                );
-            } else {
-                this.filteredProducts = this.products;
-            }
+            this.$router.push("/login");
         },
     },
     mounted() {
-        // Inicializa a lista de produtos filtrados com todos os produtos
-        this.filteredProducts = this.products;
+        this.fetchProducts();
     },
 };
 </script>
@@ -208,6 +357,7 @@ body {
     display: flex;
     min-height: 100vh;
     flex-direction: column;
+    margin: 0;
 }
 
 main {
@@ -245,6 +395,9 @@ main {
     background-color: #f5f5f5 !important;
     color: #909497 !important;
     box-shadow: 0 -4px 6px -2px rgba(0, 0, 0, 0.2);
+    bottom: 0px;
+    position: absolute;
+    width: 100%;
 }
 
 .structure {
