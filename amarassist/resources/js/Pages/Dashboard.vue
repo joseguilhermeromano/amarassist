@@ -167,14 +167,6 @@ export default {
             filteredProducts: [],
         };
     },
-    created() {
-        const token = localStorage.getItem("token");
-        if (!token) {
-            Inertia.visit("/login");
-        } else {
-            axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-        }
-    },
     computed: {
         currentYear() {
             return new Date().getFullYear();
@@ -184,7 +176,7 @@ export default {
         logout() {
             localStorage.removeItem("token");
             delete axios.defaults.headers.common["Authorization"];
-            this.$inertia.visit("/");
+            this.$inertia.visit("/", { replace: true });
         },
         createProduct() {
             alert("Criar novo produto");
