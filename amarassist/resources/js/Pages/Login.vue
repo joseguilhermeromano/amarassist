@@ -9,6 +9,8 @@
                     height="120"
                     class="img-center"
                 />
+                <!-- Container para o toast -->
+                <div id="toast-container"></div>
                 <form @submit.prevent="handleLogin">
                     <div class="input-field">
                         <i class="fas fa-user prefix"></i>
@@ -47,6 +49,8 @@
 </template>
 
 <script>
+import M from "materialize-css"; // Importe o Materialize para usar o toast
+
 export default {
     data() {
         return {
@@ -55,8 +59,34 @@ export default {
         };
     },
     methods: {
-        handleLogin() {
-            this.$inertia.visit("/dashboard");
+        async handleLogin() {
+            try {
+                const response = await axios.post("/api/login", {
+                    email: this.email,
+                    password: this.password,
+                });
+
+                localStorage.setItem("token", response.data.token);
+                axios.defaults.headers.common[
+                    "Authorization"
+                ] = `Bearer ${response.data.token}`;
+
+                this.$inertia.visit("/dashboard");
+            } catch (error) {
+                if (error.response && error.response.status === 401) {
+                    M.toast({
+                        html: "Credenciais inválidas. Tente novamente.",
+                        classes: "red",
+                        displayLength: 4000,
+                    });
+                } else {
+                    M.toast({
+                        html: "Ocorreu um erro ao tentar fazer login. Tente novamente mais tarde.",
+                        classes: "red",
+                        displayLength: 4000,
+                    });
+                }
+            }
         },
     },
 };

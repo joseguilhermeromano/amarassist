@@ -167,6 +167,14 @@ export default {
             filteredProducts: [],
         };
     },
+    created() {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            Inertia.visit("/login");
+        } else {
+            axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        }
+    },
     computed: {
         currentYear() {
             return new Date().getFullYear();
@@ -174,9 +182,9 @@ export default {
     },
     methods: {
         logout() {
-            alert("Logout realizado com sucesso!");
-            // Redirecionar para a tela de login, por exemplo:
-            // this.$router.push({ name: "Login" });
+            localStorage.removeItem("token");
+            delete axios.defaults.headers.common["Authorization"];
+            this.$inertia.visit("/");
         },
         createProduct() {
             alert("Criar novo produto");
