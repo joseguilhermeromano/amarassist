@@ -43,7 +43,7 @@
                     <div class="page-title">
                         <h4>Produtos</h4>
                         <a
-                            class="btn waves-effect waves-light btn-orange"
+                            class="btn waves-effect waves-light btn-orange new-product"
                             @click="createProduct"
                         >
                             <i class="fa fa-plus small-icon"></i>Novo Produto
@@ -58,14 +58,14 @@
                         />
                         <label for="search">Buscar Produto</label>
                     </div>
-                    <table>
+                    <table class="striped">
                         <thead>
                             <tr>
                                 <th>ID</th>
                                 <th>Nome</th>
                                 <th>Descrição</th>
                                 <th>Preço</th>
-                                <th>Ações</th>
+                                <th class="text-center">Ações</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -77,46 +77,32 @@
                                 <td>{{ product.name }}</td>
                                 <td>{{ product.description }}</td>
                                 <td>{{ product.price }}</td>
-                                <td>
+                                <td class="table-actions">
                                     <a
-                                        class="btn-flat"
+                                        class="btn-flat btn-action"
                                         @click="viewProduct(product.id)"
                                     >
-                                        <i class="material-icons">visibility</i>
+                                        <i class="fa fa-eye small-icon"></i>
+                                        Detalhes
                                     </a>
                                     <a
-                                        class="btn-flat"
+                                        class="btn-flat btn-action"
                                         @click="editProduct(product.id)"
                                     >
-                                        <i class="material-icons">edit</i>
+                                        <i class="fa fa-edit small-icon"></i>
+                                        Editar
                                     </a>
                                     <a
-                                        class="btn-flat"
+                                        class="btn-flat btn-action"
                                         @click="deleteProduct(product.id)"
                                     >
-                                        <i class="material-icons">delete</i>
+                                        <i class="fa fa-trash small-icon"></i>
+                                        Excluir
                                     </a>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
-                    <ul class="pagination">
-                        <li class="disabled">
-                            <a href="#!"
-                                ><i class="material-icons">chevron_left</i></a
-                            >
-                        </li>
-                        <li class="active"><a href="#!">1</a></li>
-                        <li class="waves-effect"><a href="#!">2</a></li>
-                        <li class="waves-effect"><a href="#!">3</a></li>
-                        <li class="waves-effect"><a href="#!">4</a></li>
-                        <li class="waves-effect"><a href="#!">5</a></li>
-                        <li class="waves-effect">
-                            <a href="#!"
-                                ><i class="material-icons">chevron_right</i></a
-                            >
-                        </li>
-                    </ul>
                 </div>
             </div>
         </main>
@@ -196,15 +182,19 @@ export default {
             }
         },
         filterProducts() {
-            this.filteredProducts = this.products.filter((product) =>
-                product.name
-                    .toLowerCase()
-                    .includes(this.searchQuery.toLowerCase())
-            );
+            if (this.searchQuery) {
+                this.filteredProducts = this.products.filter((product) =>
+                    product.name
+                        .toLowerCase()
+                        .includes(this.searchQuery.toLowerCase())
+                );
+            } else {
+                this.filteredProducts = this.products;
+            }
         },
     },
     mounted() {
-        // Filtra os produtos ao carregar a página
+        // Inicializa a lista de produtos filtrados com todos os produtos
         this.filteredProducts = this.products;
     },
 };
@@ -280,5 +270,54 @@ main {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+}
+
+table.striped {
+    border-collapse: collapse;
+    width: 100%;
+    margin-top: 20px;
+}
+
+table.striped th,
+table.striped td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: left;
+}
+
+table.striped th {
+    background-color: #f5f5f5;
+    font-weight: bold;
+}
+
+table.striped tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+table.striped tr:hover {
+    background-color: #f1f1f1;
+}
+
+.btn-action {
+    margin: 0 5px;
+    color: $blue-color !important;
+}
+
+.btn-action:hover {
+    color: $orange-color !important;
+}
+
+.new-product {
+    margin-top: 25px;
+}
+.table-actions {
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    align-items: start;
+}
+
+.text-center {
+    text-align: center;
 }
 </style>

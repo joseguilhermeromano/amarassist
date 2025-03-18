@@ -9,9 +9,12 @@
                     height="120"
                     class="img-center"
                 />
-                <!-- Container para o toast -->
-                <div id="toast-container"></div>
                 <form @submit.prevent="handleLogin">
+                    <!-- Mensagem de erro -->
+                    <div v-if="errorMessage" class="error-message">
+                        {{ errorMessage }}
+                    </div>
+
                     <div class="input-field">
                         <i class="fas fa-user prefix"></i>
                         <input
@@ -20,6 +23,7 @@
                             class="custom-input"
                             v-model="email"
                             required
+                            :disabled="loading"
                         />
                         <label for="email">E-mail</label>
                     </div>
@@ -31,15 +35,19 @@
                             class="custom-input"
                             v-model="password"
                             required
+                            :disabled="loading"
                         />
                         <label for="password">Senha</label>
                     </div>
+
                     <div class="center-align">
                         <button
                             type="submit"
-                            class="btn waves-effect waves-light"
+                            class="btn waves-effect waves-light center-align"
+                            :disabled="loading"
                         >
-                            Entrar
+                            <LoadingSpinner v-if="loading" />
+                            <span v-else>Entrar</span>
                         </button>
                     </div>
                 </form>
@@ -49,17 +57,26 @@
 </template>
 
 <script>
-import M from "materialize-css"; // Importe o Materialize para usar o toast
+import axios from "axios";
+import LoadingSpinner from "@/components/LoadingSpinner.vue";
 
 export default {
+    components: {
+        LoadingSpinner,
+    },
     data() {
         return {
             email: "",
             password: "",
+            errorMessage: "",
+            loading: false,
         };
     },
     methods: {
         async handleLogin() {
+            this.errorMessage = "";
+            this.loading = true;
+
             try {
                 const response = await axios.post("/api/login", {
                     email: this.email,
@@ -74,18 +91,14 @@ export default {
                 this.$inertia.visit("/dashboard");
             } catch (error) {
                 if (error.response && error.response.status === 401) {
-                    M.toast({
-                        html: "Credenciais inválidas. Tente novamente.",
-                        classes: "red",
-                        displayLength: 4000,
-                    });
+                    this.errorMessage =
+                        "Credenciais inválidas. Tente novamente.";
                 } else {
-                    M.toast({
-                        html: "Ocorreu um erro ao tentar fazer login. Tente novamente mais tarde.",
-                        classes: "red",
-                        displayLength: 4000,
-                    });
+                    this.errorMessage =
+                        "Ocorreu um erro ao tentar fazer login. Tente novamente mais tarde.";
                 }
+            } finally {
+                this.loading = false;
             }
         },
     },
@@ -111,15 +124,18 @@ $orange-color: #f36606;
         border: 2px solid $blue-color;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         display: flex;
-        flex-direction: row;
+        flex-direction: column;
         align-items: center;
-        justify-content: center;
 
-        h4 {
-            color: #333;
-            margin-bottom: 20px;
-            font-family: "Nunito", sans-serif;
-            font-weight: 400;
+        .error-message {
+            color: red;
+            font-size: 14px;
+            text-align: center;
+            background: #ffebee;
+            padding: 8px;
+            border-radius: 5px;
+            width: 100%;
+            margin-bottom: 10px;
         }
 
         .input-field {
@@ -150,10 +166,24 @@ $orange-color: #f36606;
             font-family: "Nunito", sans-serif;
             font-weight: 400;
             background-color: $blue-color;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 40px;
+
             &:hover {
                 background-color: $blue-color;
             }
+
+            &:disabled {
+                background-color: gray;
+                cursor: not-allowed;
+            }
         }
+    }
+
+    .center-align {
+        margin: 0 auto;
     }
 }
 </style>
